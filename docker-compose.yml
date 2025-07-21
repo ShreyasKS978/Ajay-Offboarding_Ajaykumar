@@ -2,64 +2,53 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:13
+    image: postgres:14
     container_name: postgres_offboarding
     ports:
       - "6630:5432"
     environment:
+      POSTGRES_DB: new_employee_db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin123
-      POSTGRES_DB: new_employee_db
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - offboarding_net
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
-    build:
-      context: ./Backend
+    build: ./Backend
     container_name: backend_offboarding
     ports:
       - "3071:3071"
-    environment:
-      PORT: 3071
-      DB_USER: postgres
-      DB_PASSWORD: admin123
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_NAME: new_employee_db
-      HOST: 0.0.0.0
     depends_on:
-      - postgres
-    networks:
-      - offboarding_net
+      postgres:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGUSER: postgres
+      PGPASSWORD: admin123
+      PGDATABASE: new_employee_db
+      PGPORT: 5432
 
   frontend:
-    build:
-      context: ./Frontend
+    build: ./Frontend
     container_name: frontend_offboarding
     ports:
       - "8198:80"
     depends_on:
       - backend
-    networks:
-      - offboarding_net
 
   hr_page:
-    build:
-      context: ./Hr_page
-    container_name: hrpage_offboarding
+    build: ./Hr_page
+    container_name: hr_offboarding
     ports:
       - "8199:80"
     depends_on:
       - backend
-    networks:
-      - offboarding_net
 
 volumes:
-  pg_data:
-
-networks:
-  offboarding_net:
-
+  postgres_data:
