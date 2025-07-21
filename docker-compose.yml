@@ -5,7 +5,7 @@ services:
     image: postgres:13
     container_name: postgres_offboarding
     ports:
-      - "6587:5432"
+      - "6630:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin123
@@ -21,9 +21,9 @@ services:
       context: ./Backend
     container_name: backend_offboarding
     ports:
-      - "3028:3028"
+      - "3071:3071"
     environment:
-      PORT: 3028
+      PORT: 3071
       DB_USER: postgres
       DB_PASSWORD: admin123
       DB_HOST: postgres
@@ -40,7 +40,7 @@ services:
       context: ./Frontend
     container_name: frontend_offboarding
     ports:
-      - "8108:80"
+      - "8198:80"
     depends_on:
       - backend
     networks:
@@ -51,7 +51,7 @@ services:
       context: ./Hr_page
     container_name: hrpage_offboarding
     ports:
-      - "8109:80"
+      - "8199:80"
     depends_on:
       - backend
     networks:
