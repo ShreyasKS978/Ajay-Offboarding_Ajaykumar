@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres_offboarding
+    ports:
+      - "6587:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: new_employee_db
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - offboarding_net
+
+  backend:
+    build:
+      context: ./Backend
+    container_name: backend_offboarding
+    ports:
+      - "3028:3028"
+    environment:
+      PORT: 3028
+      DB_USER: postgres
+      DB_PASSWORD: admin123
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: new_employee_db
+      HOST: 0.0.0.0
+    depends_on:
+      - postgres
+    networks:
+      - offboarding_net
+
+  frontend:
+    build:
+      context: ./Frontend
+    container_name: frontend_offboarding
+    ports:
+      - "8108:80"
+    depends_on:
+      - backend
+    networks:
+      - offboarding_net
+
+  hr_page:
+    build:
+      context: ./Hr_page
+    container_name: hrpage_offboarding
+    ports:
+      - "8109:80"
+    depends_on:
+      - backend
+    networks:
+      - offboarding_net
+
+volumes:
+  pg_data:
+
+networks:
+  offboarding_net:
+
